@@ -9,7 +9,7 @@ Module to work with files and directories in archive in [pathlib](https://docs.p
 
 Install from [PyPI](https://pypi.org/project/dephell-archive/):
 
-```python
+```bash
 python3 -m pip install --user dephell_archive
 ```
 

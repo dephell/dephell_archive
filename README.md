@@ -5,6 +5,14 @@ Module to work with files and directories in archive in [pathlib](https://docs.p
 * **Goal:** provide the same interface as `pathlib.Path` for archives.
 * **State:** partially implemented. Need to implement more methods.
 
+## Installation
+
+Install from [PyPI](https://pypi.org/project/dephell-archive/):
+
+```python
+python3 -m pip install --user dephell_archive
+```
+
 ## Usage
 
 ```python

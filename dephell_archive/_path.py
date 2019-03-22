@@ -1,5 +1,5 @@
 # built-in
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from pathlib import Path, PurePath
 from tarfile import TarFile
 from typing import Callable, Iterator
@@ -35,8 +35,12 @@ class ArchivePath:
 
     @property
     def extractor(self) -> Callable:
-        extension = ''.join(self.archive_path.suffixes)
-        return EXTRACTORS[extension]
+        extension = ''
+        for suffix in reversed(self.archive_path.suffixes):
+            extension = suffix + extension
+            with suppress(KeyError):
+                return EXTRACTORS[extension]
+        raise KeyError('Invalid extension: ' + extension)
 
     @property
     def name(self) -> str:

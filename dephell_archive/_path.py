@@ -2,7 +2,7 @@
 from contextlib import contextmanager, suppress
 from pathlib import Path, PurePath
 from tarfile import TarFile
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Union
 from zipfile import ZipFile
 
 # external
@@ -45,6 +45,12 @@ class ArchivePath:
     @property
     def name(self) -> str:
         return self.member_path.name or self.archive_path.name
+
+    @property
+    def parent(self) -> Union['ArchivePath', Path]:
+        if self.member_path:
+            return self.copy(member_path=self.member_path.parent)
+        return self.archive_path
 
     # context managers
 
@@ -131,6 +137,20 @@ class ArchivePath:
         with self.open() as stream:
             return stream.exists()
 
+    def read_bytes(self):
+        """
+        Open the file in bytes mode, read it, and close the file.
+        """
+        with self.open(mode='rb') as stream:
+            return stream.read()
+
+    def read_text(self):
+        """
+        Open the file in text mode, read it, and close the file.
+        """
+        with self.open(mode='r') as stream:
+            return stream.read()
+
     def with_suffix(self, suffix) -> 'ArchivePath':
         return self.copy(member_path=self.member_path.with_suffix(suffix))
 
@@ -139,11 +159,11 @@ class ArchivePath:
 
     # magic methods
 
-    def __truediv__(self, key):
-        obj = self.__class__(
+    def __truediv__(self, part: str) -> 'ArchivePath':
+        obj = type(self)(
             archive_path=self.archive_path,
             cache_path=self.cache_path,
-            member_path=self.member_path / key,
+            member_path=self.member_path / part,
         )
         obj._descriptor = self._descriptor
         return obj

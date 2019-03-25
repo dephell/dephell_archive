@@ -10,17 +10,14 @@ class ArchiveStream:
     mode = attr.ib()
 
     def exists(self):
-        if hasattr(self.descriptor, 'getmember'):
-            # tar
-            try:
-                self.descriptor.getmember(str(self.member_path))
-            except KeyError:
-                return False
-            return True
-        else:
-            # zip
-            member = self.descriptor.getinfo(str(self.member_path))  # i'm not sure
-            return bool(member)
+        try:
+            if hasattr(self.descriptor, 'getmember'):
+                self.descriptor.getmember(str(self.member_path))  # tar
+            else:
+                self.descriptor.getinfo(str(self.member_path))  # zip
+        except KeyError:
+            return False
+        return True
 
     def read(self):
         path = self.cache_path / self.member_path

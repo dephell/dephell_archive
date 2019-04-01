@@ -17,6 +17,7 @@ EXTRACTORS = {
     '.zip': ZipFile,
     '.whl': ZipFile,
     '.tar': TarFile.taropen,
+    '.tgz': TarFile.gzopen,
     '.tar.gz': TarFile.gzopen,
     '.tar.bz2': TarFile.bz2open,
     '.tar.xz': TarFile.xzopen,

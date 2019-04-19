@@ -34,7 +34,7 @@ def test_glob_zip(tmpdir):
     )
     paths = list(path.glob('*/__init__.py'))
     assert len(paths) == 1
-    assert str(paths[0]) == 'dephell/__init__.py'
+    assert paths[0].as_posix() == 'dephell/__init__.py'
 
 
 def test_glob_tar(tmpdir):
@@ -44,7 +44,7 @@ def test_glob_tar(tmpdir):
     )
     paths = list(path.glob('*/setup.py'))
     assert len(paths) == 1
-    assert str(paths[0]) == 'dephell-0.2.0/setup.py'
+    assert paths[0].as_posix() == 'dephell-0.2.0/setup.py'
 
 
 def test_glob_dir(tmpdir):

@@ -16,11 +16,14 @@ from ._stream import ArchiveStream
 EXTRACTORS = {
     '.zip': ZipFile,
     '.whl': ZipFile,
-    '.tar': TarFile.taropen,
-    '.tgz': TarFile.gzopen,
-    '.tar.gz': TarFile.gzopen,
-    '.tar.bz2': TarFile.bz2open,
-    '.tar.xz': TarFile.xzopen,
+
+    # idk why this is not included in typeshed and python docs,
+    # but these methods always been here from initial implementation
+    '.tar': TarFile.taropen,        # type: ignore
+    '.tgz': TarFile.gzopen,         # type: ignore
+    '.tar.gz': TarFile.gzopen,      # type: ignore
+    '.tar.bz2': TarFile.bz2open,    # type: ignore
+    '.tar.xz': TarFile.xzopen,      # type: ignore
 }
 
 
@@ -75,11 +78,11 @@ class ArchivePath:
                 raise
 
     @contextmanager
-    def open(self, mode='r'):
+    def open(self, mode: str = 'r', encoding=None):
         # read from cache
         path = self.cache_path / self.member_path
         if path.exists():
-            with path.open() as stream:
+            with path.open(mode, encoding=encoding) as stream:
                 yield stream
         else:
             with self.get_descriptor() as descriptor:
@@ -88,6 +91,7 @@ class ArchivePath:
                     cache_path=self.cache_path,
                     member_path=self.member_path,
                     mode=mode,
+                    encoding=encoding,
                 )
 
     # methods
@@ -128,7 +132,7 @@ class ArchivePath:
 
     def glob(self, pattern: str) -> Iterator['ArchivePath']:
         for path in self.iterdir(recursive=True):
-            if glob_path(path=str(path), pattern=pattern):
+            if glob_path(path=path.as_posix(), pattern=pattern):
                 yield path
 
     def exists(self) -> bool:
@@ -152,10 +156,10 @@ class ArchivePath:
         with self.open(mode='r') as stream:
             return stream.read()
 
-    def with_suffix(self, suffix) -> 'ArchivePath':
+    def with_suffix(self, suffix: str) -> 'ArchivePath':
         return self.copy(member_path=self.member_path.with_suffix(suffix))
 
-    def with_name(self, name) -> 'ArchivePath':
+    def with_name(self, name: str) -> 'ArchivePath':
         return self.copy(member_path=self.member_path.with_name(name))
 
     # magic methods
@@ -169,8 +173,8 @@ class ArchivePath:
         obj._descriptor = self._descriptor
         return obj
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str):
         return getattr(self.member_path, name)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.member_path)

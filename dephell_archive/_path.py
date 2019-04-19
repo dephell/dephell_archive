@@ -132,7 +132,7 @@ class ArchivePath:
 
     def glob(self, pattern: str) -> Iterator['ArchivePath']:
         for path in self.iterdir(recursive=True):
-            if glob_path(path=str(path), pattern=pattern):
+            if glob_path(path=path.as_posix(), pattern=pattern):
                 yield path
 
     def exists(self) -> bool:

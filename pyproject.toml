@@ -2,6 +2,19 @@
 from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
 
+[tool.dephell.flake8]
+from = {format = "pip", path = "requirements-flake.txt"}
+command = "flake8"
+
+[tool.dephell.pytest]
+from = {format = "poetry", path = "pyproject.toml"}
+command = "pytest tests/"
+
+[tool.dephell.typing]
+from = {format = "poetry", path = "pyproject.toml"}
+command = "mypy --ignore-missing-imports --allow-redefinition dephell_archive"
+
+
 [tool.poetry]
 name = "dephell-archive"
 version = "0.1.2"

@@ -27,15 +27,15 @@ class ArchiveStream:
     def read(self):
         path = self.cache_path / self.member_path
         if path.exists():
-            raise FileExistsError('file created between open and read')
+            raise FileExistsError('file in cache created between open and read')
 
         # extract to cache
         if hasattr(self.descriptor, 'getmember'):
             # tar
-            member = self.descriptor.getmember(str(self.member_path))
+            member = self.descriptor.getmember(self.member_path.as_posix())
         else:
             # zip
-            member = self.descriptor.getinfo(str(self.member_path))
+            member = self.descriptor.getinfo(self.member_path.as_posix())
         self.descriptor.extract(member=member, path=str(self.cache_path))
 
         # read from cache

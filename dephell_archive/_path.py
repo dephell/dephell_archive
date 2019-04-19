@@ -16,11 +16,14 @@ from ._stream import ArchiveStream
 EXTRACTORS = {
     '.zip': ZipFile,
     '.whl': ZipFile,
-    '.tar': TarFile.taropen,
-    '.tgz': TarFile.gzopen,
-    '.tar.gz': TarFile.gzopen,
-    '.tar.bz2': TarFile.bz2open,
-    '.tar.xz': TarFile.xzopen,
+
+    # idk why this is not included in typeshed and python docs,
+    # but these methods always been here from initial implementation
+    '.tar': TarFile.taropen,        # type: ignore
+    '.tgz': TarFile.gzopen,         # type: ignore
+    '.tar.gz': TarFile.gzopen,      # type: ignore
+    '.tar.bz2': TarFile.bz2open,    # type: ignore
+    '.tar.xz': TarFile.xzopen,      # type: ignore
 }
 
 

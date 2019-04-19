@@ -5,7 +5,7 @@ import pytest
 from dephell_archive._glob import glob_path
 
 
-@pytest.mark.parametrize("path,pattern,ok", [
+@pytest.mark.parametrize('path, pattern, ok', [
     ('/lol/', '/lol/', True),
     ('/lol/', '/lal/', False),
 

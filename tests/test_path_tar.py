@@ -5,9 +5,12 @@ from pathlib import Path
 from dephell_archive import ArchivePath
 
 
+sdist_path = Path(__file__).parent / 'requirements' / 'sdist.tar.gz'
+
+
 def test_open(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell-0.2.0' / 'setup.py'
@@ -18,7 +21,7 @@ def test_open(tmpdir):
 
 def test_glob(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
     )
     paths = list(path.glob('*/setup.py'))
@@ -28,7 +31,7 @@ def test_glob(tmpdir):
 
 def test_glob_dir(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
     )
     paths = list(path.glob('dephell-*/'))
@@ -37,7 +40,7 @@ def test_glob_dir(tmpdir):
 
 def test_iterdir(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
     )
     paths = [str(subpath) for subpath in path.iterdir(recursive=True)]
@@ -49,7 +52,7 @@ def test_iterdir(tmpdir):
 
 def test_exists(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell-0.2.0' / 'setup.py'
@@ -61,7 +64,7 @@ def test_exists(tmpdir):
 
 def test_is_file(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell-0.2.0' / 'setup.py'
@@ -73,7 +76,7 @@ def test_is_file(tmpdir):
 
 def test_is_dir(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell-0.2.0' / 'setup.py'

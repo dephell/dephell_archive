@@ -4,10 +4,12 @@ from pathlib import Path
 # project
 from dephell_archive import ArchivePath
 
+wheel_path = Path(__file__).parent / 'requirements' / 'wheel.whl'
+
 
 def test_open_zip(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        archive_path=wheel_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell' / '__init__.py'
@@ -18,7 +20,7 @@ def test_open_zip(tmpdir):
 
 def test_glob_zip(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        archive_path=wheel_path,
         cache_path=Path(str(tmpdir)),
     )
     paths = list(path.glob('*/__init__.py'))
@@ -28,7 +30,7 @@ def test_glob_zip(tmpdir):
 
 def test_exists(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        archive_path=wheel_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell' / '__init__.py'
@@ -40,7 +42,7 @@ def test_exists(tmpdir):
 
 def test_is_file(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        archive_path=wheel_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell' / '__init__.py'
@@ -52,7 +54,7 @@ def test_is_file(tmpdir):
 
 def test_is_dir(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        archive_path=wheel_path,
         cache_path=Path(str(tmpdir)),
     )
     subpath = path / 'dephell' / '__init__.py'

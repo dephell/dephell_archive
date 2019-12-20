@@ -5,18 +5,7 @@ from pathlib import Path
 from dephell_archive import ArchivePath
 
 
-def test_open_zip(tmpdir):
-    path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
-        cache_path=Path(str(tmpdir)),
-    )
-    subpath = path / 'dephell' / '__init__.py'
-    with subpath.open() as stream:
-        content = stream.read()
-    assert 'from .controllers' in content
-
-
-def test_open_tar_gz(tmpdir):
+def test_open_tar(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
         cache_path=Path(str(tmpdir)),
@@ -25,16 +14,6 @@ def test_open_tar_gz(tmpdir):
     with subpath.open() as stream:
         content = stream.read()
     assert 'from setuptools import' in content
-
-
-def test_glob_zip(tmpdir):
-    path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
-        cache_path=Path(str(tmpdir)),
-    )
-    paths = list(path.glob('*/__init__.py'))
-    assert len(paths) == 1
-    assert paths[0].as_posix() == 'dephell/__init__.py'
 
 
 def test_glob_tar(tmpdir):
@@ -47,7 +26,7 @@ def test_glob_tar(tmpdir):
     assert paths[0].as_posix() == 'dephell-0.2.0/setup.py'
 
 
-def test_glob_dir(tmpdir):
+def test_glob_dir_tar(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
         cache_path=Path(str(tmpdir)),
@@ -56,7 +35,7 @@ def test_glob_dir(tmpdir):
     assert len(paths) == 1
 
 
-def test_iterdir(tmpdir):
+def test_iterdir_tar(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
         cache_path=Path(str(tmpdir)),
@@ -66,3 +45,15 @@ def test_iterdir(tmpdir):
     for path in paths:
         assert paths.count(path) == 1, 'duplicate dir: ' + path
     assert 'dephell-0.2.0' in paths
+
+
+def test_exists_tar(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        cache_path=Path(str(tmpdir)),
+    )
+    path = path / 'dephell-0.2.0' / 'setup.py'
+    assert path.exists() is True
+
+    path = path / 'dephell-0.2.0' / 'not-a-setup.py'
+    assert path.exists() is False

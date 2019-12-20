@@ -24,3 +24,39 @@ def test_glob_zip(tmpdir):
     paths = list(path.glob('*/__init__.py'))
     assert len(paths) == 1
     assert paths[0].as_posix() == 'dephell/__init__.py'
+
+
+def test_exists(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dephell' / '__init__.py'
+    assert subpath.exists() is True
+
+    subpath = path / 'dephell' / 'some_junk.py'
+    assert subpath.exists() is False
+
+
+def test_is_file(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dephell' / '__init__.py'
+    assert subpath.is_file() is True
+
+    subpath = path / 'dephell'
+    assert subpath.is_file() is False
+
+
+def test_is_dir(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dephell' / '__init__.py'
+    assert subpath.is_dir() is False
+
+    subpath = path / 'dephell'
+    # assert subpath.is_dir() is True

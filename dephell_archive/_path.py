@@ -84,15 +84,17 @@ class ArchivePath:
         if path.exists():
             with path.open(mode, encoding=encoding) as stream:
                 yield stream
-        else:
-            with self.get_descriptor() as descriptor:
-                yield ArchiveStream(
-                    descriptor=descriptor,
-                    cache_path=self.cache_path,
-                    member_path=self.member_path,
-                    mode=mode,
-                    encoding=encoding,
-                )
+            return
+
+        # stream from the archivew
+        with self.get_descriptor() as descriptor:
+            yield ArchiveStream(
+                descriptor=descriptor,
+                cache_path=self.cache_path,
+                member_path=self.member_path,
+                mode=mode,
+                encoding=encoding,
+            )
 
     # methods
 
@@ -141,6 +143,20 @@ class ArchivePath:
             return True
         with self.open() as stream:
             return stream.exists()
+
+    def is_file(self) -> bool:
+        path = self.cache_path / self.member_path
+        if path.exists():
+            return path.is_file()
+        with self.open() as stream:
+            return stream.is_file()
+
+    def is_dir(self) -> bool:
+        path = self.cache_path / self.member_path
+        if path.exists():
+            return path.is_dir()
+        with self.open() as stream:
+            return stream.is_dir()
 
     def read_bytes(self):
         """

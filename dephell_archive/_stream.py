@@ -17,9 +17,9 @@ class ArchiveStream:
     def exists(self) -> bool:
         try:
             if hasattr(self.descriptor, 'getmember'):
-                self.descriptor.getmember(str(self.member_path))  # tar
+                self.descriptor.getmember(self.member_path.as_posix())  # tar
             else:
-                self.descriptor.getinfo(str(self.member_path))  # zip
+                self.descriptor.getinfo(self.member_path.as_posix())  # zip
         except KeyError:
             return False
         return True

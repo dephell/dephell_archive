@@ -27,6 +27,26 @@ def test_open_tar_gz(tmpdir, requirements_path: Path):
     assert 'from setuptools import' in content
 
 
+def test_exists_zip(tmpdir, requirements_path: Path):
+    path = ArchivePath(
+        archive_path=requirements_path / 'wheel.whl',
+        cache_path=Path(str(tmpdir)),
+    )
+
+    subpath = path / 'dephell' / '__init__.py'
+    assert subpath.exists()
+
+
+def test_exists_tar_gz(tmpdir, requirements_path: Path):
+    path = ArchivePath(
+        archive_path=requirements_path / 'sdist.tar.gz',
+        cache_path=Path(str(tmpdir)),
+    )
+
+    subpath = path / 'dephell-0.2.0' / 'setup.py'
+    assert subpath.exists()
+
+
 def test_glob_zip(tmpdir, requirements_path: Path):
     path = ArchivePath(
         archive_path=requirements_path / 'wheel.whl',

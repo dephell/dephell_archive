@@ -82,12 +82,21 @@ def test_is_dir_explicit_entry(tmpdir):
     assert subpath.is_dir() is False
 
 
+def test_iterdir_non_recursive_zip(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'dnspython-1.16.0.zip'),
+        cache_path=Path(str(tmpdir)),
+    )
+    paths = [str(subpath) for subpath in path.iterdir(_recursive=False)]
+    assert paths == ['dnspython-1.16.0']
+
+
 def test_iterdir_recursive_zip(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'dnspython-1.16.0.zip'),
         cache_path=Path(str(tmpdir)),
     )
-    paths = [str(subpath) for subpath in path.iterdir(recursive=True)]
+    paths = [str(subpath) for subpath in path.iterdir(_recursive=True)]
 
     assert 'dnspython-1.16.0' in paths
     assert str(Path('dnspython-1.16.0', 'setup.py')) in paths
@@ -99,12 +108,21 @@ def test_iterdir_recursive_zip(tmpdir):
         assert paths.count(path) == 1, 'duplicate dir: ' + path
 
 
+def test_iterdir_non_recursive_zip_with_dirs(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'graphviz-0.13.2.zip'),
+        cache_path=Path(str(tmpdir)),
+    )
+    paths = [str(subpath) for subpath in path.iterdir(_recursive=False)]
+    assert paths == ['graphviz-0.13.2']
+
+
 def test_iterdir_recursive_zip_with_dirs(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'graphviz-0.13.2.zip'),
         cache_path=Path(str(tmpdir)),
     )
-    paths = [str(subpath) for subpath in path.iterdir(recursive=True)]
+    paths = [str(subpath) for subpath in path.iterdir(_recursive=True)]
 
     assert 'graphviz-0.13.2' in paths
     assert str(Path('graphviz-0.13.2', 'setup.py')) in paths
@@ -114,12 +132,23 @@ def test_iterdir_recursive_zip_with_dirs(tmpdir):
         assert paths.count(path) == 1, 'duplicate dir: ' + path
 
 
-def test_iterdir_recursive_wheel(tmpdir):
+def test_iterdir_non_recursive_wheel(tmpdir):
     path = ArchivePath(
-        archive_path=Path('tests', 'requirements', 'wheel.whl'),
+        archive_path=wheel_path,
         cache_path=Path(str(tmpdir)),
     )
-    paths = [str(subpath) for subpath in path.iterdir(recursive=True)]
+    paths = [str(subpath) for subpath in path.iterdir(_recursive=False)]
+    assert len(paths) == 2
+    assert 'dephell' in paths
+    assert 'dephell-0.2.0.dist-info' in paths
+
+
+def test_iterdir_recursive_wheel(tmpdir):
+    path = ArchivePath(
+        archive_path=wheel_path,
+        cache_path=Path(str(tmpdir)),
+    )
+    paths = [str(subpath) for subpath in path.iterdir(_recursive=True)]
 
     assert 'dephell' in paths
     assert str(Path('dephell', '__init__.py')) in paths

@@ -192,6 +192,7 @@ class ArchivePath:
             names = set()
             for member in members:
                 name = getattr(member, 'name', None) or member.filename
+                name = name.rstrip('/')
                 names.add(name)
             dirs = {''}
             for name in names:

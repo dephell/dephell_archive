@@ -26,7 +26,7 @@ def test_glob_zip(tmpdir):
     )
     paths = list(path.glob('*/__init__.py'))
     assert len(paths) == 1
-    assert paths[0].as_posix() == 'dephell/__init__.py'
+    assert paths[0].member_path.as_posix() == 'dephell/__init__.py'
 
 
 def test_exists(tmpdir):

@@ -18,8 +18,8 @@ class ArchiveStream:
     def _get_info(self):
         with suppress(KeyError):
             if hasattr(self.descriptor, 'getmember'):
-                return self.descriptor.getmember(str(self.member_path))  # tar
-            return self.descriptor.getinfo(str(self.member_path))  # zip
+                return self.descriptor.getmember(self.member_path.as_posix())  # tar
+            return self.descriptor.getinfo(self.member_path.as_posix())  # zip
         return None
 
     def exists(self) -> bool:

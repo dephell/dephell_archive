@@ -57,7 +57,7 @@ class ArchivePath:
         return self.archive_path
 
     @property
-    def parts(self) -> Tuple[str]:
+    def parts(self) -> Tuple[str, ...]:
         return self.archive_path.parts + self.member_path.parts
 
     @property
@@ -73,8 +73,8 @@ class ArchivePath:
         return self.archive_path.anchor
 
     @property
-    def parents(self) -> Tuple[Union['ArchivePath', Path]]:
-        parents = []
+    def parents(self) -> Tuple[Union['ArchivePath', Path], ...]:
+        parents = []  # type: List[Union[ArchivePath, Path]]
         for parent in self.member_path.parents:
             parents.append(self.copy(member_path=parent))
 

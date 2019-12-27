@@ -26,7 +26,7 @@ def test_glob(tmpdir):
     )
     paths = list(path.glob('*/setup.py'))
     assert len(paths) == 1
-    assert paths[0].as_posix() == 'dephell-0.2.0/setup.py'
+    assert paths[0].member_path.as_posix() == 'dephell-0.2.0/setup.py'
 
 
 def test_glob_dir(tmpdir):

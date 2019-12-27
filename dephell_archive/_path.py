@@ -2,7 +2,7 @@
 from contextlib import contextmanager, suppress
 from pathlib import Path, PurePath
 from tarfile import TarFile
-from typing import Callable, Iterator, Union
+from typing import Callable, Iterator, List, Tuple, Union
 from zipfile import ZipFile
 
 # external
@@ -56,6 +56,47 @@ class ArchivePath:
             return self.copy(member_path=self.member_path.parent)
         return self.archive_path
 
+    @property
+    def parts(self) -> Tuple[str]:
+        return self.archive_path.parts + self.member_path.parts
+
+    @property
+    def drive(self) -> str:
+        return self.archive_path.drive
+
+    @property
+    def root(self) -> str:
+        return self.archive_path.root
+
+    @property
+    def anchor(self) -> str:
+        return self.archive_path.anchor
+
+    @property
+    def parents(self) -> Tuple[Union['ArchivePath', Path]]:
+        parents = []
+        for parent in self.member_path.parents:
+            parents.append(self.copy(member_path=parent))
+
+        parents += list(self.archive_path.parents)
+        return tuple(parents)
+
+    @property
+    def suffix(self) -> str:
+        if self.member_path:
+            return self.member_path.suffix
+        return self.archive_path.suffix
+
+    @property
+    def suffixes(self) -> List[str]:
+        if self.member_path:
+            return self.member_path.suffixes
+        return self.archive_path.suffixes
+
+    @property
+    def stem(self) -> str:
+        return self.member_path.stem or self.archive_path.stem
+
     # context managers
 
     @contextmanager
@@ -98,6 +139,34 @@ class ArchivePath:
 
     # methods
 
+    def as_posix(self) -> str:
+        if self.member_path:
+            return self.archive_path.joinpath(self.member_path).as_posix()
+        return self.archive_path.as_posix()
+
+    def as_uri(self) -> str:
+        if self.member_path:
+            return self.archive_path.joinpath(self.member_path).as_uri()
+        return self.archive_path.as_uri()
+
+    def is_absolute(self):
+        return self.archive_path.is_absolute()
+
+    def is_reserved(self):
+        return self.archive_path.is_reserved()
+
+    def joinpath(self, *other):
+        member_path = self.member_path.joinpath(*other)
+        return self.copy(member_path=member_path)
+
+    def expanduser(self):
+        archive_path = self.archive_path.expanduser()
+        return self.copy(archive_path=archive_path)
+
+    def resolve(self):
+        archive_path = self.archive_path.resolve()
+        return self.copy(archive_path=archive_path)
+
     def copy(self, **kwargs) -> 'ArchivePath':
         params = attr.asdict(self, recurse=False)
         params.update(kwargs)
@@ -134,7 +203,7 @@ class ArchivePath:
 
     def glob(self, pattern: str) -> Iterator['ArchivePath']:
         for path in self.iterdir(recursive=True):
-            if glob_path(path=path.as_posix(), pattern=pattern):
+            if glob_path(path=path.member_path.as_posix(), pattern=pattern):
                 yield path
 
     def exists(self) -> bool:

@@ -1,9 +1,21 @@
 from contextlib import suppress
 from pathlib import Path, PurePath
-from typing import Optional
+from typing import Optional, List, Set
 
 # external
 import attr
+
+
+def _dir_list(filelist: List[str]) -> Set[str]:
+    # paths starting with '/' or containing '.' are not supported
+    dir_list = set()  # type: Set[str]
+    for path in filelist:
+        while path:
+            path, _, _ = path.rpartition('/')
+            if not path or path in dir_list:
+                break
+            dir_list.add(path)
+    return dir_list
 
 
 @attr.s(slots=True)
@@ -14,6 +26,7 @@ class ArchiveStream:
 
     mode = attr.ib(type=str, default='r')
     encoding = attr.ib(type=Optional[str], default=None)
+    _dir_list = attr.ib(default=None)
 
     def _get_info(self):
         path = self.member_path.as_posix()
@@ -41,13 +54,12 @@ class ArchiveStream:
 
     def _is_implicit_dir(self) -> bool:
         # Only zip have implicit dirs
-        if not hasattr(self.descriptor, 'getinfo'):
+        if not hasattr(self.descriptor, 'namelist'):
             return False
-        path = self.member_path.as_posix() + '/'
-        for filename in self.descriptor.namelist():
-            if filename.startswith(path):
-                return True
-        return False
+        if self._dir_list is None:
+            self._dir_list = _dir_list(self.descriptor.namelist())
+        path = self.member_path.as_posix()
+        return path in self._dir_list
 
     def is_dir(self) -> bool:
         info = self._get_info()

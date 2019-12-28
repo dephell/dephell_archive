@@ -82,7 +82,7 @@ def test_is_dir_explicit_entry(tmpdir):
     assert subpath.is_dir() is False
 
 
-def test_iterdir_non_recursive_zip(tmpdir):
+def test_iterdir_non_recursive(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'dnspython-1.16.0.zip'),
         cache_path=Path(str(tmpdir)),
@@ -91,7 +91,7 @@ def test_iterdir_non_recursive_zip(tmpdir):
     assert paths == ['dnspython-1.16.0']
 
 
-def test_iterdir_recursive_zip(tmpdir):
+def test_iterdir_recursive(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'dnspython-1.16.0.zip'),
         cache_path=Path(str(tmpdir)),
@@ -108,7 +108,47 @@ def test_iterdir_recursive_zip(tmpdir):
         assert paths.count(path) == 1, 'duplicate dir: ' + path
 
 
-def test_iterdir_non_recursive_zip_with_dirs(tmpdir):
+def test_iterdir_subpath_non_recursive(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'dnspython-1.16.0.zip'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dnspython-1.16.0'
+    paths = [str(item) for item in subpath.iterdir(_recursive=False)]
+
+    for path in paths:
+        assert paths.count(path) == 1, 'duplicate dir: ' + path
+
+    assert 'dns' in paths
+    assert 'dnspython.egg-info' in paths
+    assert 'setup.py' in paths
+
+    subpath = subpath / 'dns'
+    paths = [str(item) for item in subpath.iterdir(_recursive=False)]
+    assert 'rdtypes' in paths
+
+    for path in paths:
+        assert paths.count(path) == 1, 'duplicate dir: ' + path
+
+
+def test_iterdir_subpath_recursive(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'dnspython-1.16.0.zip'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dnspython-1.16.0'
+    paths = [str(item) for item in subpath.iterdir(_recursive=True)]
+
+    assert 'setup.py' in paths
+    assert Path('dnspython-1.16.0', 'dns') not in paths
+    assert 'dns' in paths
+    assert str(Path('dns', '__init__.py')) in paths
+
+    for path in paths:
+        assert paths.count(path) == 1, 'duplicate dir: ' + path
+
+
+def test_iterdir_non_recursive_with_dirs(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'graphviz-0.13.2.zip'),
         cache_path=Path(str(tmpdir)),
@@ -117,7 +157,7 @@ def test_iterdir_non_recursive_zip_with_dirs(tmpdir):
     assert paths == ['graphviz-0.13.2']
 
 
-def test_iterdir_recursive_zip_with_dirs(tmpdir):
+def test_iterdir_recursive_with_dirs(tmpdir):
     path = ArchivePath(
         archive_path=Path('tests', 'requirements', 'graphviz-0.13.2.zip'),
         cache_path=Path(str(tmpdir)),
@@ -127,6 +167,50 @@ def test_iterdir_recursive_zip_with_dirs(tmpdir):
     assert 'graphviz-0.13.2' in paths
     assert str(Path('graphviz-0.13.2', 'setup.py')) in paths
     assert str(Path('graphviz-0.13.2', 'graphviz', '__init__.py')) in paths
+
+    for path in paths:
+        assert paths.count(path) == 1, 'duplicate dir: ' + path
+
+
+def test_iterdir_subpath_non_recursive_with_dirs(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'graphviz-0.13.2.zip'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'graphviz-0.13.2'
+    paths = [str(item) for item in subpath.iterdir(_recursive=False)]
+    assert 'graphviz' in paths
+    assert 'graphviz.egg-info' in paths
+    assert 'setup.py' in paths
+
+    for path in paths:
+        assert paths.count(path) == 1, 'duplicate dir: ' + path
+
+    subpath = subpath / 'graphviz.egg-info'
+    paths = [str(item) for item in subpath.iterdir(_recursive=False)]
+
+    for path in paths:
+        assert paths.count(path) == 1, 'duplicate dir: ' + path
+
+    assert set(paths) == {
+        'dependency_links.txt',
+        'PKG-INFO',
+        'requires.txt',
+        'SOURCES.txt',
+        'top_level.txt',
+    }
+
+
+def test_iterdir_subpath_recursive_with_dirs(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'graphviz-0.13.2.zip'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'graphviz-0.13.2'
+    paths = [str(item) for item in subpath.iterdir(_recursive=True)]
+
+    assert 'graphviz' in paths
+    assert str(Path('graphviz', '__init__.py')) in paths
 
     for path in paths:
         assert paths.count(path) == 1, 'duplicate dir: ' + path

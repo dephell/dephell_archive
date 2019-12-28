@@ -119,6 +119,48 @@ def test_iterdir_recursive_tarball(tmpdir):
         assert paths.count(path) == 1, 'duplicate dir: ' + path
 
 
+def test_iterdir_subpath_non_recursive(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dephell-0.2.0'
+    paths = set(str(item) for item in subpath.iterdir(_recursive=False))
+    assert paths == {
+        'dephell',
+        'dephell.egg-info',
+        'PKG-INFO',
+        'README.md',
+        'setup.cfg',
+        'setup.py',
+    }
+    subpath = subpath / 'dephell.egg-info'
+    paths = set(str(item) for item in subpath.iterdir(_recursive=False))
+    assert paths == {
+        'dependency_links.txt',
+        'entry_points.txt',
+        'PKG-INFO',
+        'requires.txt',
+        'SOURCES.txt',
+        'top_level.txt',
+    }
+
+
+def test_iterdir_subpath_recursive(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'sdist.tar.gz'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dephell-0.2.0'
+    paths = [str(item) for item in subpath.iterdir(_recursive=True)]
+
+    assert 'dephell' in paths
+    assert str(Path('dephell', '__init__.py')) in paths
+
+    for path in paths:
+        assert paths.count(path) == 1, 'duplicate dir: ' + path
+
+
 def test_exists(tmpdir):
     path = ArchivePath(
         archive_path=sdist_path,

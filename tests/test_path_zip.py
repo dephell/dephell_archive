@@ -62,7 +62,24 @@ def test_is_dir(tmpdir):
     assert subpath.is_dir() is False
 
     subpath = path / 'dephell'
-    # assert subpath.is_dir() is True
+    assert subpath.exists() is True
+    assert subpath.is_dir() is True
+
+
+def test_is_dir_explicit_entry(tmpdir):
+    path = ArchivePath(
+        archive_path=Path('tests', 'requirements', 'graphviz-0.13.2.zip'),
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'graphviz-0.13.2'
+    assert subpath.is_dir() is True
+
+    subpath = subpath / 'graphviz'
+    assert subpath.exists() is True
+    assert subpath.is_dir() is True
+
+    subpath = subpath / '__init__.py'
+    assert subpath.is_dir() is False
 
 
 def test_iterdir_recursive_zip(tmpdir):

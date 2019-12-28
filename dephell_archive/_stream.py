@@ -46,6 +46,9 @@ class ArchiveStream:
         return info.filename[-1] == '/'
 
     def read(self):
+        if not self.member_path.name:
+            raise NotImplementedError
+
         path = self.cache_path / self.member_path
         if path.exists():
             raise FileExistsError('file in cache created between open and read')

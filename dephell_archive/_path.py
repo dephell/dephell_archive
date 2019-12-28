@@ -120,6 +120,12 @@ class ArchivePath:
 
     @contextmanager
     def open(self, mode: str = 'r', encoding=None):
+        if 'w' in mode:
+            raise NotImplementedError
+
+        if not self.member_path.name:
+            raise IsADirectoryError
+
         # read from cache
         path = self.cache_path / self.member_path
         if path.exists():
@@ -207,6 +213,9 @@ class ArchivePath:
                 yield path
 
     def exists(self) -> bool:
+        if not self.member_path.name:
+            return True
+
         path = self.cache_path / self.member_path
         if path.exists():
             return True
@@ -214,6 +223,9 @@ class ArchivePath:
             return stream.exists()
 
     def is_file(self) -> bool:
+        if not self.member_path.name:
+            return False
+
         path = self.cache_path / self.member_path
         if path.exists():
             return path.is_file()
@@ -221,6 +233,9 @@ class ArchivePath:
             return stream.is_file()
 
     def is_dir(self) -> bool:
+        if not self.member_path.name:
+            return True
+
         path = self.cache_path / self.member_path
         if path.exists():
             return path.is_dir()

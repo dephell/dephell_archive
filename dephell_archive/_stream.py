@@ -28,6 +28,8 @@ class ArchiveStream:
     encoding = attr.ib(type=Optional[str], default=None)
     _dir_list = attr.ib(default=None)
 
+    # private
+
     def _get_info(self):
         path = self.member_path.as_posix()
         with suppress(KeyError):
@@ -38,6 +40,17 @@ class ArchiveStream:
             except KeyError:
                 return self.descriptor.getinfo(path + '/')  # zip dir
         return None
+
+    def _is_implicit_dir(self) -> bool:
+        # Only zip have implicit dirs
+        if not hasattr(self.descriptor, 'namelist'):
+            return False
+        if self._dir_list is None:
+            self._dir_list = _dir_list(self.descriptor.namelist())
+        path = self.member_path.as_posix()
+        return path in self._dir_list
+
+    # used from ArchivePath
 
     def exists(self) -> bool:
         return self.is_file() or self.is_dir()
@@ -52,15 +65,6 @@ class ArchiveStream:
         # zip
         return info.filename[-1] != '/'
 
-    def _is_implicit_dir(self) -> bool:
-        # Only zip have implicit dirs
-        if not hasattr(self.descriptor, 'namelist'):
-            return False
-        if self._dir_list is None:
-            self._dir_list = _dir_list(self.descriptor.namelist())
-        path = self.member_path.as_posix()
-        return path in self._dir_list
-
     def is_dir(self) -> bool:
         info = self._get_info()
         if info is None:
@@ -71,6 +75,8 @@ class ArchiveStream:
             return info.isdir()
         # zip explicit dir entry
         return info.filename[-1] == '/'
+
+    # public interface
 
     def read(self):
         if not self.member_path.name:

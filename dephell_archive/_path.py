@@ -220,7 +220,6 @@ class ArchivePath:
     def exists(self) -> bool:
         if self._is_root:
             return True
-
         path = self.cache_path / self.member_path
         if path.exists():
             return True
@@ -230,7 +229,6 @@ class ArchivePath:
     def is_file(self) -> bool:
         if self._is_root:
             return False
-
         path = self.cache_path / self.member_path
         if path.exists():
             return path.is_file()
@@ -240,7 +238,6 @@ class ArchivePath:
     def is_dir(self) -> bool:
         if self._is_root:
             return True
-
         path = self.cache_path / self.member_path
         if path.exists():
             return path.is_dir()

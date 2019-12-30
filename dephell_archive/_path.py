@@ -38,6 +38,10 @@ class ArchivePath:
     # properties
 
     @property
+    def _is_root(self) -> bool:
+        return self.member_path.name == ''
+
+    @property
     def extractor(self) -> Callable:
         extension = ''
         for suffix in reversed(self.archive_path.suffixes):
@@ -52,7 +56,7 @@ class ArchivePath:
 
     @property
     def parent(self) -> Union['ArchivePath', Path]:
-        if self.member_path:
+        if not self._is_root:
             return self.copy(member_path=self.member_path.parent)
         return self.archive_path
 
@@ -83,13 +87,13 @@ class ArchivePath:
 
     @property
     def suffix(self) -> str:
-        if self.member_path:
+        if not self._is_root:
             return self.member_path.suffix
         return self.archive_path.suffix
 
     @property
     def suffixes(self) -> List[str]:
-        if self.member_path:
+        if not self._is_root:
             return self.member_path.suffixes
         return self.archive_path.suffixes
 
@@ -123,7 +127,7 @@ class ArchivePath:
         if 'w' in mode:
             raise NotImplementedError
 
-        if not self.member_path.name:
+        if self._is_root:
             raise IsADirectoryError
 
         # read from cache
@@ -146,12 +150,12 @@ class ArchivePath:
     # methods
 
     def as_posix(self) -> str:
-        if self.member_path:
+        if not self._is_root:
             return self.archive_path.joinpath(self.member_path).as_posix()
         return self.archive_path.as_posix()
 
     def as_uri(self) -> str:
-        if self.member_path:
+        if not self._is_root:
             return self.archive_path.joinpath(self.member_path).as_uri()
         return self.archive_path.as_uri()
 
@@ -214,7 +218,7 @@ class ArchivePath:
                 yield path
 
     def exists(self) -> bool:
-        if not self.member_path.name:
+        if self._is_root:
             return True
 
         path = self.cache_path / self.member_path
@@ -224,7 +228,7 @@ class ArchivePath:
             return stream.exists()
 
     def is_file(self) -> bool:
-        if not self.member_path.name:
+        if self._is_root:
             return False
 
         path = self.cache_path / self.member_path
@@ -234,7 +238,7 @@ class ArchivePath:
             return stream.is_file()
 
     def is_dir(self) -> bool:
-        if not self.member_path.name:
+        if self._is_root:
             return True
 
         path = self.cache_path / self.member_path

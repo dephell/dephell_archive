@@ -36,11 +36,11 @@ class ArchiveStream:
         return hasattr(self.descriptor, 'getmember')
 
     @cached_property
-    def _dir_list(self) -> bool:
+    def _dir_list(self) -> Set[str]:
         return _dir_list(self.descriptor.namelist())
 
     @cached_property
-    def _info(self) -> bool:
+    def _info(self):
         path = self.member_path.as_posix()
         with suppress(KeyError):
             if self._is_tar:
@@ -91,11 +91,7 @@ class ArchiveStream:
             raise FileExistsError('file in cache created between open and read')
 
         # extract to cache
-        if self._is_tar:
-            member = self.descriptor.getmember(self.member_path.as_posix())
-        else:
-            member = self.descriptor.getinfo(self.member_path.as_posix())
-        self.descriptor.extract(member=member, path=str(self.cache_path))
+        self.descriptor.extract(member=self._info, path=str(self.cache_path))
 
         # read from cache
         with path.open(self.mode, encoding=self.encoding) as stream:

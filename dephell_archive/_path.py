@@ -197,7 +197,7 @@ class ArchivePath:
             # get files
             for member in members:
                 name = getattr(member, 'name', None) or member.filename
-                if self.member_path.name:
+                if not self._is_root:
                     if self.member_path.as_posix() not in name:
                         continue
                     name = name[len(self.member_path.as_posix()):]
@@ -226,7 +226,7 @@ class ArchivePath:
             names = set()
             for member in members:
                 name = getattr(member, 'name', None) or member.filename
-                if self.member_path.name:
+                if not self._is_root:
                     if self.member_path.as_posix() not in name:
                         continue
                     name = name[len(self.member_path.as_posix()):]

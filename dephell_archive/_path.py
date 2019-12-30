@@ -2,7 +2,7 @@
 from contextlib import contextmanager, suppress
 from pathlib import Path, PurePath
 from tarfile import TarFile
-from typing import Callable, Iterator, List, Set, Tuple, Union
+from typing import Callable, Iterator, List, Optional, Set, Tuple, Union
 from zipfile import ZipFile
 
 # external
@@ -186,6 +186,22 @@ class ArchivePath:
         new._descriptor = self._descriptor
         return new
 
+    def _get_file_name(self, member) -> Optional[str]:
+        name = getattr(member, 'name', None) or member.filename
+        if self._is_root:
+            return name
+
+        if self.member_path.as_posix() not in name:
+            return None
+        name = name[len(self.member_path.as_posix()):]
+        if not name:
+            return None
+        # remove '/'
+        name = name[1:]
+        if not name:
+            return None
+        return name
+
     def iterdir(self, _recursive: bool = True) -> Iterator['ArchivePath']:
         with self.get_descriptor() as descriptor:
             if hasattr(descriptor, 'getmembers'):
@@ -196,17 +212,9 @@ class ArchivePath:
             top_level_items = set()  # type: Set[str]
             # get files
             for member in members:
-                name = getattr(member, 'name', None) or member.filename
-                if not self._is_root:
-                    if self.member_path.as_posix() not in name:
-                        continue
-                    name = name[len(self.member_path.as_posix()):]
-                    if not name:
-                        continue
-                    # remove '/'
-                    name = name[1:]
-                    if not name:
-                        continue
+                name = self._get_file_name(member=member)
+                if name is None:
+                    continue
 
                 if not _recursive:
                     path, _sep, _name = name.partition('/')
@@ -225,17 +233,9 @@ class ArchivePath:
             # get dirs
             names = set()
             for member in members:
-                name = getattr(member, 'name', None) or member.filename
-                if not self._is_root:
-                    if self.member_path.as_posix() not in name:
-                        continue
-                    name = name[len(self.member_path.as_posix()):]
-                    if not name:
-                        continue
-                    # remove '/'
-                    name = name[1:]
-                    if not name:
-                        continue
+                name = self._get_file_name(member=member)
+                if name is None:
+                    continue
 
                 name = name.rstrip('/')
                 names.add(name)

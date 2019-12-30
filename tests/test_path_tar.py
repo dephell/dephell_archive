@@ -1,6 +1,9 @@
 # built-in
 from pathlib import Path
 
+# external
+import pytest
+
 # project
 from dephell_archive import ArchivePath
 
@@ -8,10 +11,64 @@ from dephell_archive import ArchivePath
 sdist_path = Path(__file__).parent / 'requirements' / 'sdist.tar.gz'
 
 
+def test_toplevel(tmpdir):
+    path = ArchivePath(
+        archive_path=sdist_path,
+        cache_path=Path(str(tmpdir)),
+    )
+    assert path.is_dir()
+    assert not path.is_file()
+    assert path.exists()
+
+    with pytest.raises(IsADirectoryError):
+        with path.open():
+            pass
+
+
+def test_toplevel_missing_cache_path(tmpdir):
+    path = ArchivePath(
+        archive_path=sdist_path,
+        cache_path=Path(str(tmpdir), 'missing'),
+    )
+    assert path.is_dir()
+    assert not path.is_file()
+    assert path.exists()
+
+    with pytest.raises(IsADirectoryError):
+        with path.open():
+            pass
+
+    with pytest.raises(NotImplementedError):
+        with path.open('w'):
+            pass
+
+
 def test_open(tmpdir):
     path = ArchivePath(
         archive_path=sdist_path,
         cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dephell-0.2.0' / 'setup.py'
+    with subpath.open() as stream:
+        content = stream.read()
+    assert 'from setuptools import' in content
+
+
+def test_open_write(tmpdir):
+    path = ArchivePath(
+        archive_path=sdist_path,
+        cache_path=Path(str(tmpdir)),
+    )
+    subpath = path / 'dephell-0.2.0'
+    with pytest.raises(NotImplementedError):
+        with subpath.open('w'):
+            pass
+
+
+def test_open_missing_cache_path(tmpdir):
+    path = ArchivePath(
+        archive_path=sdist_path,
+        cache_path=Path(str(tmpdir), 'missing'),
     )
     subpath = path / 'dephell-0.2.0' / 'setup.py'
     with subpath.open() as stream:

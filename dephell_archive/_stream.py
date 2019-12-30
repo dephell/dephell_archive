@@ -36,7 +36,8 @@ class ArchiveStream:
     def _is_tar(self) -> bool:
         return hasattr(self.descriptor, 'getmember')
 
-    def _get_info(self):
+    @cached_property
+    def _info(self):
         path = self.member_path.as_posix()
         with suppress(KeyError):
             if self._is_tar:
@@ -62,22 +63,20 @@ class ArchiveStream:
         return self.is_file() or self.is_dir()
 
     def is_file(self) -> bool:
-        info = self._get_info()
-        if info is None:
+        if self._info is None:
             return False
         if self._is_tar:
-            return info.isfile()
+            return self._info.isfile()
         # zip
-        return info.filename[-1] != '/'
+        return self._info.filename[-1] != '/'
 
     def is_dir(self) -> bool:
-        info = self._get_info()
-        if info is None:
+        if self._info is None:
             return self._is_implicit_dir()
         if self._is_tar:
-            return info.isdir()
+            return self._info.isdir()
         # zip explicit dir entry
-        return info.filename[-1] == '/'
+        return self._info.filename[-1] == '/'
 
     # public interface
 

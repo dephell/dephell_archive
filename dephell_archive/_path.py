@@ -2,7 +2,7 @@
 from contextlib import contextmanager, suppress
 from pathlib import Path, PurePath
 from tarfile import TarFile
-from typing import Callable, Iterator, List, Set, Tuple, Union
+from typing import Callable, Iterator, List, Optional, Set, Tuple, Union
 from zipfile import ZipFile
 
 # external
@@ -38,6 +38,10 @@ class ArchivePath:
     # properties
 
     @property
+    def _is_root(self) -> bool:
+        return self.member_path.name == ''
+
+    @property
     def extractor(self) -> Callable:
         extension = ''
         for suffix in reversed(self.archive_path.suffixes):
@@ -52,7 +56,7 @@ class ArchivePath:
 
     @property
     def parent(self) -> Union['ArchivePath', Path]:
-        if self.member_path:
+        if not self._is_root:
             return self.copy(member_path=self.member_path.parent)
         return self.archive_path
 
@@ -83,13 +87,13 @@ class ArchivePath:
 
     @property
     def suffix(self) -> str:
-        if self.member_path:
+        if not self._is_root:
             return self.member_path.suffix
         return self.archive_path.suffix
 
     @property
     def suffixes(self) -> List[str]:
-        if self.member_path:
+        if not self._is_root:
             return self.member_path.suffixes
         return self.archive_path.suffixes
 
@@ -123,7 +127,7 @@ class ArchivePath:
         if 'w' in mode:
             raise NotImplementedError
 
-        if not self.member_path.name:
+        if self._is_root:
             raise IsADirectoryError
 
         # read from cache
@@ -146,12 +150,12 @@ class ArchivePath:
     # methods
 
     def as_posix(self) -> str:
-        if self.member_path:
+        if not self._is_root:
             return self.archive_path.joinpath(self.member_path).as_posix()
         return self.archive_path.as_posix()
 
     def as_uri(self) -> str:
-        if self.member_path:
+        if not self._is_root:
             return self.archive_path.joinpath(self.member_path).as_uri()
         return self.archive_path.as_uri()
 
@@ -182,6 +186,16 @@ class ArchivePath:
         new._descriptor = self._descriptor
         return new
 
+    def _get_file_name(self, member) -> Optional[str]:
+        name = getattr(member, 'name', None) or member.filename
+        if self._is_root:
+            return name
+        prefix = self.member_path.as_posix() + '/'
+        if not name.startswith(prefix):
+            return None
+        name = name[len(prefix):]
+        return name or None
+
     def iterdir(self, _recursive: bool = True) -> Iterator['ArchivePath']:
         with self.get_descriptor() as descriptor:
             if hasattr(descriptor, 'getmembers'):
@@ -192,17 +206,9 @@ class ArchivePath:
             top_level_items = set()  # type: Set[str]
             # get files
             for member in members:
-                name = getattr(member, 'name', None) or member.filename
-                if self.member_path.name:
-                    if self.member_path.as_posix() not in name:
-                        continue
-                    name = name[len(self.member_path.as_posix()):]
-                    if not name:
-                        continue
-                    # remove '/'
-                    name = name[1:]
-                    if not name:
-                        continue
+                name = self._get_file_name(member=member)
+                if name is None:
+                    continue
 
                 if not _recursive:
                     path, _sep, _name = name.partition('/')
@@ -221,17 +227,9 @@ class ArchivePath:
             # get dirs
             names = set()
             for member in members:
-                name = getattr(member, 'name', None) or member.filename
-                if self.member_path.name:
-                    if self.member_path.as_posix() not in name:
-                        continue
-                    name = name[len(self.member_path.as_posix()):]
-                    if not name:
-                        continue
-                    # remove '/'
-                    name = name[1:]
-                    if not name:
-                        continue
+                name = self._get_file_name(member=member)
+                if name is None:
+                    continue
 
                 name = name.rstrip('/')
                 names.add(name)
@@ -249,9 +247,8 @@ class ArchivePath:
                 yield path
 
     def exists(self) -> bool:
-        if not self.member_path.name:
+        if self._is_root:
             return True
-
         path = self.cache_path / self.member_path
         if path.exists():
             return True
@@ -259,9 +256,8 @@ class ArchivePath:
             return stream.exists()
 
     def is_file(self) -> bool:
-        if not self.member_path.name:
+        if self._is_root:
             return False
-
         path = self.cache_path / self.member_path
         if path.exists():
             return path.is_file()
@@ -269,9 +265,8 @@ class ArchivePath:
             return stream.is_file()
 
     def is_dir(self) -> bool:
-        if not self.member_path.name:
+        if self._is_root:
             return True
-
         path = self.cache_path / self.member_path
         if path.exists():
             return path.is_dir()

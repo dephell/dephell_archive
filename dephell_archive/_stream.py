@@ -28,7 +28,6 @@ class ArchiveStream:
 
     mode = attr.ib(type=str, default='r')
     encoding = attr.ib(type=Optional[str], default=None)
-    _dir_list = attr.ib(default=None)
 
     # private
 
@@ -37,7 +36,11 @@ class ArchiveStream:
         return hasattr(self.descriptor, 'getmember')
 
     @cached_property
-    def _info(self):
+    def _dir_list(self) -> bool:
+        return _dir_list(self.descriptor.namelist())
+
+    @cached_property
+    def _info(self) -> bool:
         path = self.member_path.as_posix()
         with suppress(KeyError):
             if self._is_tar:
@@ -48,12 +51,11 @@ class ArchiveStream:
                 return self.descriptor.getinfo(path + '/')  # zip dir
         return None
 
+    @cached_property
     def _is_implicit_dir(self) -> bool:
         # Only zip have implicit dirs
         if self._is_tar:
             return False
-        if self._dir_list is None:
-            self._dir_list = _dir_list(self.descriptor.namelist())
         path = self.member_path.as_posix()
         return path in self._dir_list
 
@@ -72,7 +74,7 @@ class ArchiveStream:
 
     def is_dir(self) -> bool:
         if self._info is None:
-            return self._is_implicit_dir()
+            return self._is_implicit_dir
         if self._is_tar:
             return self._info.isdir()
         # zip explicit dir entry

@@ -190,17 +190,11 @@ class ArchivePath:
         name = getattr(member, 'name', None) or member.filename
         if self._is_root:
             return name
-
-        if not name.startswith(self.member_path.as_posix()):
+        prefix = self.member_path.as_posix() + '/'
+        if not name.startswith(prefix):
             return None
-        name = name[len(self.member_path.as_posix()):]
-        if not name:
-            return None
-        if name[0] == '/':
-            name = name[1:]
-        if not name:
-            return None
-        return name
+        name = name[len(prefix):]
+        return name or None
 
     def iterdir(self, _recursive: bool = True) -> Iterator['ArchivePath']:
         with self.get_descriptor() as descriptor:

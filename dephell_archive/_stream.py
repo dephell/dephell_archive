@@ -1,10 +1,12 @@
+# built-in
 from contextlib import suppress
 from pathlib import Path, PurePath
-from typing import Optional, List, Set
+from typing import List, Optional, Set
 
 # external
 import attr
 
+# app
 from ._cached_property import cached_property
 
 

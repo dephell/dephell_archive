@@ -191,13 +191,13 @@ class ArchivePath:
         if self._is_root:
             return name
 
-        if self.member_path.as_posix() not in name:
+        if not name.startswith(self.member_path.as_posix()):
             return None
         name = name[len(self.member_path.as_posix()):]
         if not name:
             return None
-        # remove '/'
-        name = name[1:]
+        if name[0] == '/':
+            name = name[1:]
         if not name:
             return None
         return name

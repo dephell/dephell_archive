@@ -5,6 +5,8 @@ from typing import Optional, List, Set
 # external
 import attr
 
+from ._cached_property import cached_property
+
 
 def _dir_list(filelist: List[str]) -> Set[str]:
     # paths starting with '/' or containing '.' are not supported
@@ -18,7 +20,7 @@ def _dir_list(filelist: List[str]) -> Set[str]:
     return dir_list
 
 
-@attr.s(slots=True)
+@attr.s()
 class ArchiveStream:
     descriptor = attr.ib()
     cache_path = attr.ib(type=Path)
@@ -30,11 +32,15 @@ class ArchiveStream:
 
     # private
 
+    @cached_property
+    def _is_tar(self) -> bool:
+        return hasattr(self.descriptor, 'getmember')
+
     def _get_info(self):
         path = self.member_path.as_posix()
         with suppress(KeyError):
-            if hasattr(self.descriptor, 'getmember'):
-                return self.descriptor.getmember(path)  # tar
+            if self._is_tar:
+                return self.descriptor.getmember(path)
             try:
                 return self.descriptor.getinfo(path)  # zip file
             except KeyError:
@@ -43,7 +49,7 @@ class ArchiveStream:
 
     def _is_implicit_dir(self) -> bool:
         # Only zip have implicit dirs
-        if not hasattr(self.descriptor, 'namelist'):
+        if self._is_tar:
             return False
         if self._dir_list is None:
             self._dir_list = _dir_list(self.descriptor.namelist())
@@ -59,8 +65,7 @@ class ArchiveStream:
         info = self._get_info()
         if info is None:
             return False
-        # tar
-        if hasattr(info, 'isfile'):
+        if self._is_tar:
             return info.isfile()
         # zip
         return info.filename[-1] != '/'
@@ -69,9 +74,7 @@ class ArchiveStream:
         info = self._get_info()
         if info is None:
             return self._is_implicit_dir()
-
-        # tar
-        if hasattr(info, 'isdir'):
+        if self._is_tar:
             return info.isdir()
         # zip explicit dir entry
         return info.filename[-1] == '/'
@@ -87,11 +90,9 @@ class ArchiveStream:
             raise FileExistsError('file in cache created between open and read')
 
         # extract to cache
-        if hasattr(self.descriptor, 'getmember'):
-            # tar
+        if self._is_tar:
             member = self.descriptor.getmember(self.member_path.as_posix())
         else:
-            # zip
             member = self.descriptor.getinfo(self.member_path.as_posix())
         self.descriptor.extract(member=member, path=str(self.cache_path))
 

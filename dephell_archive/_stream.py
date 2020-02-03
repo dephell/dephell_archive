@@ -46,7 +46,11 @@ class ArchiveStream:
         path = self.member_path.as_posix()
         with suppress(KeyError):
             if self._is_tar:
-                return self.descriptor.getmember(path)
+                try:
+                    return self.descriptor.getmember(path)
+                except KeyError:
+                    # Handle archives with a single top-level '.' member
+                    return self.descriptor.getmember('./' + str(path))
             try:
                 return self.descriptor.getinfo(path)  # zip file
             except KeyError:

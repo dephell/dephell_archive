@@ -19,7 +19,7 @@ command = "mypy --ignore-missing-imports --allow-redefinition dephell_archive"
 
 [tool.poetry]
 name = "dephell-archive"
-version = "0.1.6"
+version = "0.1.7"
 description = "pathlib for archives"
 authors = ["Gram <gram@orsinium.dev>"]
 readme = "README.md"

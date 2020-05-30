@@ -1,6 +1,7 @@
 [tool.dephell.main]
 from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
+tag = "v."
 
 [tool.dephell.flake8]
 from = {format = "pip", path = "requirements-flake.txt"}
@@ -20,7 +21,7 @@ command = "mypy --ignore-missing-imports --allow-redefinition dephell_archive"
 name = "dephell-archive"
 version = "0.1.6"
 description = "pathlib for archives"
-authors = ["Gram <master_fess@mail.ru>"]
+authors = ["Gram <gram@orsinium.dev>"]
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/dephell/dephell_archive"
@@ -51,5 +52,5 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.5"
+python = ">=3.6"
 attrs = "*"
